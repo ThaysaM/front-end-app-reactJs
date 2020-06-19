@@ -1,5 +1,5 @@
 import ApiService from '../apiservice';
-
+import ErroValidacao from '../../app/exception/ErroValidacao'
 export default class AgendamentoService extends ApiService{
     constructor(){
         super('/api/agendamento')
@@ -32,7 +32,7 @@ export default class AgendamentoService extends ApiService{
             {label: '13:00', value: '13:00'},
             {label: '14:00', value: '14:00'},
             {label: '15:00', value: '15:00'},
-            {label: '16:00', value: '16:00'},
+            {label: '16:00', value: '16:00'}
         ]
     }
 
@@ -77,7 +77,7 @@ export default class AgendamentoService extends ApiService{
         return [
             {label: 'Selecione...', value: ''},
             {label: 'Feminino', value: 'MENINA'},
-            {label: 'Mascoluno', value: 'MENINO'}
+            {label: 'Masculino', value: 'MENINO'}
         ]
     }
 
@@ -102,6 +102,75 @@ export default class AgendamentoService extends ApiService{
         ]
     }
     
+    obterPorId(id){
+        return this.get(`/${id}`);
+    }
+
+    alterarStatus(id, status){
+        return this.put(`/${id}/atualiza-status`, {status})
+    }
+
+    validar(agendamento){
+        const erros = [];
+
+        
+        if(!agendamento.nomeDaMae){
+            erros.push("Informe seu Nome.")
+        }
+
+        if(!agendamento.telefone){
+            erros.push("Informe o Telefone.")
+        }
+
+        
+        if(!agendamento.nomeDaCrianca){
+            erros.push("Informe o Nome da criança.")
+        }
+      
+        if(!agendamento.idadeDaCrianca){
+            erros.push("Informe a idade da criança.")
+        }
+
+        if(!agendamento.sexoDaCrianca){
+            erros.push("Informe o sexo da criança.")
+        }
+
+        if(!agendamento.tipoDaSessao){
+            erros.push("Informe o Tipo da sessão.")
+        }
+
+        if(!agendamento.tema){
+            erros.push("Informe o Tema da sessão.")
+        }
+
+        if(!agendamento.ano){
+            erros.push("Informe o Ano.")
+        }
+     
+        if(!agendamento.mes){
+            erros.push("Informe o Mês.")
+        }
+ 
+        if(!agendamento.dia){
+            erros.push("Informe o Dia.")
+        }
+
+        if(!agendamento.hora_agendada){
+            erros.push("Informe o Hora.")
+        }
+
+        if(erros && erros.length > 0){
+            throw new ErroValidacao(erros);
+        }
+    }
+
+    salvar(agendamento){
+        return this.post('/', agendamento);
+    }
+
+    atualizar(agendamento){
+        return this.put(`/${agendamento.id}`, agendamento);
+    }
 
     consultar(agendamentoFiltro){
         let params = `?id=${agendamentoFiltro.login}`
@@ -121,6 +190,11 @@ export default class AgendamentoService extends ApiService{
         if(agendamentoFiltro.dia){
             params = `${params}&dia=${agendamentoFiltro.dia}`
         }
+
+        if(agendamentoFiltro.ano){
+            params = `${params}&ano=${agendamentoFiltro.ano}`
+        }
+
      return this.get(params)
     }
 

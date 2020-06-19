@@ -7,9 +7,9 @@ import SelectMenu from '../components/selectMenu'
 import LancamentosTable from './lancamento/lancamentosTable'
 import AgendamentoService from '../app/service/agendamentoService'
 import LocalStorageService from '../app/service/localstorageService'
+import {AuthContext} from '../main/provedorAutenticacao'
 
-
-import {mensagemErro, mensagemSucesso}  from '../components/toastr'
+import {mensagemErro, mensagemSucesso, mensagemAlert}  from '../components/toastr'
 
 import {Dialog} from 'primereact/dialog';
 import {Button} from 'primereact/button';
@@ -21,6 +21,7 @@ class Home extends React.Component{
         mes: '',
         hora: '',
         dia: '',
+        status: '',
         agendamento: [],
         showConfirmDialog: false ,
         agendamentoDeletar: {}
@@ -49,14 +50,18 @@ class Home extends React.Component{
         this.service
         .consultar(agendamentoFiltro)
         .then(resposta => {
-            this.setState({agendamento: resposta.data})
+            const lista = resposta.data;
+            if(lista.length < 1){
+                mensagemAlert("Nenhuma resultado encontrado.");
+            }
+            this.setState({agendamento: lista})
         }).catch(erro => {
             console.log(erro)
         })
     }
 
     editar = (id) => {
-        console.log('Editando o agendamento', id)
+        this.props.history.push(`/cadastro-agendamento/${id}`)
     }
 
     abrirConfirmacao = (agendamento) =>{
@@ -80,6 +85,27 @@ class Home extends React.Component{
                 mensagemErro('Ocorreu um erro ao tentar deletar agendamento.')
             })
 
+    }
+
+    preparaFormularioCadastro = () => {
+        this.props.history.push('/cadastro-agendamento')
+    }
+
+    alterarStatus = (agendamento, status) => {
+        this.service
+            .alterarStatus(agendamento.id, status)
+            .then(response => {
+                const agendamentos = this.state.agendamento;
+                const index = agendamentos.indexOf(agendamento);
+
+                if(index !== -1){
+                    agendamento['status'] = status;
+                    agendamentos[index] = agendamento
+                    this.setState({agendamentos});
+                }
+
+                mensagemSucesso("Status atualizado com sucesso.")
+            })
     }
 
     render(){
@@ -135,8 +161,18 @@ class Home extends React.Component{
                                                         lista={horas}/>
                                         </FormGroup>
 
-                                        <button onClick={this.busca} type="button" className="btn btn-success">Buscar</button>
-                                        <button type="button" className="btn btn-danger">Agendar</button>                                
+                                        <button onClick={this.busca}
+                                                type="button" 
+                                                className="btn btn-success">
+                                                <i className="pi pi-search"></i>
+                                                Buscar
+                                                </button>
+                                        <button onClick={this.preparaFormularioCadastro}
+                                                type="button" 
+                                                className="btn btn-danger">
+                                                <i className="pi pi-plus"></i>
+                                                Agendar
+                                        </button>                                
                                     </div>
                                 </div>
                             </div>
@@ -145,7 +181,8 @@ class Home extends React.Component{
                             <Card title = "Seus agendamentos">
                                 <LancamentosTable agendamentos={this.state.agendamento}
                                                     deleteAction={this.abrirConfirmacao}
-                                                    editarAction={this.editar}/>
+                                                    editarAction={this.editar}
+                                                    alterarStatus={this.alterarStatus}/>
 
                                 <div>
                                     <Dialog header="Confirmação" 
@@ -165,5 +202,7 @@ class Home extends React.Component{
         )
     }
 }
+
+Home.contextType = AuthContext;
 
 export default withRouter(Home)
