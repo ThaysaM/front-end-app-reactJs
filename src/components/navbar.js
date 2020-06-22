@@ -7,7 +7,7 @@ function Navbar(props){
     return(
         <div className="navbar navbar-expand-lg fixed-top navbar-dark bg-secondary">
         <div className="container" style={ {position:'relative'} }>
-            <a href="#/home" className="navbar-brand">Estudio Fotográfico</a>
+            <a href="#/home" className="navbar-brand">Estúdio Fotográfico</a>
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
             </button>
